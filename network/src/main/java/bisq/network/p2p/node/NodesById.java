@@ -18,6 +18,7 @@
 package bisq.network.p2p.node;
 
 
+import bisq.common.data.ByteArray;
 import bisq.common.util.CompletableFutureUtils;
 import bisq.network.p2p.message.NetworkMessage;
 import bisq.network.p2p.services.peergroup.BanList;
@@ -52,10 +53,12 @@ public class NodesById implements Node.Listener {
     private final Node.Config nodeConfig;
     private final Set<Listener> listeners = new CopyOnWriteArraySet<>();
     private final Set<Node.Listener> nodeListeners = new CopyOnWriteArraySet<>();
+    private final ByteArray payload;
 
-    public NodesById(BanList banList, Node.Config nodeConfig) {
+    public NodesById(BanList banList, Node.Config nodeConfig, ByteArray payload) {
         this.banList = banList;
         this.nodeConfig = nodeConfig;
+        this.payload = payload;
     }
 
 
@@ -177,7 +180,7 @@ public class NodesById implements Node.Listener {
     private Node getOrCreateNode(String nodeId) {
         return findNode(nodeId)
                 .orElseGet(() -> {
-                    Node node = new Node(banList, nodeConfig, nodeId);
+                    Node node = new Node(banList, nodeConfig, nodeId, payload);
                     map.put(nodeId, node);
                     node.addListener(this);
                     listeners.forEach(listener -> listener.onNodeAdded(node));
@@ -185,3 +188,7 @@ public class NodesById implements Node.Listener {
                 });
     }
 }
+
+
+
+

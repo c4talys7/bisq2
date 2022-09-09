@@ -18,15 +18,40 @@
 package bisq.network.p2p.node.authorization;
 
 import bisq.common.proto.Proto;
-import lombok.Data;
+import bisq.security.pow.ProofOfWork;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.ToString;
+import lombok.extern.slf4j.Slf4j;
 
-@Data
+import java.util.Optional;
+
+@Slf4j
+@ToString
+@EqualsAndHashCode
 public final class AuthorizationToken implements Proto {
+
+    @Getter
+    private final AuthorizationTokenType authTokenType;
+    @Getter
+    private final Optional<ProofOfWork> pow;
+
+    public AuthorizationToken(AuthorizationTokenType authTokenType,
+                              Optional<ProofOfWork> pow) {
+        this.authTokenType = authTokenType;
+        this.pow = pow;
+    }
+
     public bisq.network.protobuf.AuthorizationToken toProto() {
-        return bisq.network.protobuf.AuthorizationToken.newBuilder().build();
+        bisq.network.protobuf.AuthorizationToken.Builder builder = bisq.network.protobuf.AuthorizationToken.newBuilder()
+                .setAuthTokenType(authTokenType.toProto());
+        pow.ifPresent(powData -> builder.setPow(powData.toProto()));
+        return builder.build();
     }
 
     public static AuthorizationToken fromProto(bisq.network.protobuf.AuthorizationToken proto) {
-        return new AuthorizationToken();
+        Optional<ProofOfWork> pow = proto.hasPow() ? Optional.of(ProofOfWork.fromProto(proto.getPow())) : Optional.empty();
+        return new AuthorizationToken(AuthorizationTokenType.fromProto(proto.getAuthTokenType()),
+                pow);
     }
 }

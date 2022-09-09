@@ -137,7 +137,7 @@ public final class ConnectionHandshake {
         try {
             Metrics metrics = new Metrics();
             OutputStream outputStream = socket.getOutputStream();
-            AuthorizationToken token = authorizationService.createToken(Request.class);
+            AuthorizationToken token = authorizationService.createHandshakeToken(Request.class);
             NetworkEnvelope requestNetworkEnvelope = new NetworkEnvelope(NetworkEnvelope.VERSION, token, new Request(capability, myLoad));
             long ts = System.currentTimeMillis();
             bisq.network.protobuf.NetworkEnvelope requestProto = requestNetworkEnvelope.toProto();
@@ -164,9 +164,10 @@ public final class ConnectionHandshake {
             if (banList.isBanned(response.getCapability().getAddress())) {
                 throw new ConnectionException("Peers address is in quarantine. response=" + response);
             }
-            if (!authorizationService.isAuthorized(responseNetworkEnvelope.getAuthorizationToken())) {
-                throw new ConnectionException("Response authorization failed. response=" + response);
-            }
+            //TODO - Were's still handshaking, we don't have enough data to "calculate" auth yet.
+            //if (!authorizationService.isAuthorized(responseNetworkEnvelope.getAuthorizationToken())) {
+            //    throw new ConnectionException("Response authorization failed. response=" + response);
+            //}
             metrics.onReceived(responseNetworkEnvelope);
             metrics.addRtt(System.currentTimeMillis() - ts);
             log.debug("Servers capability {}, load={}", response.getCapability(), response.getLoad());
@@ -208,14 +209,15 @@ public final class ConnectionHandshake {
             if (banList.isBanned(request.getCapability().getAddress())) {
                 throw new ConnectionException("Peers address is in quarantine. request=" + request);
             }
-            if (!authorizationService.isAuthorized(requestNetworkEnvelope.getAuthorizationToken())) {
-                throw new ConnectionException("Request authorization failed. request=" + request);
-            }
+            //TODO - Were's still handshaking, we don't have enough data to "calculate" auth yet.
+            //if (!authorizationService.isAuthorized(requestNetworkEnvelope.getAuthorizationToken())) {
+            //    throw new ConnectionException("Request authorization failed. request=" + request);
+            //}
             log.debug("Clients capability {}, load={}", request.getCapability(), request.getLoad());
             metrics.onReceived(requestNetworkEnvelope);
 
             OutputStream outputStream = socket.getOutputStream();
-            AuthorizationToken token = authorizationService.createToken(Response.class);
+            AuthorizationToken token = authorizationService.createHandshakeToken(Response.class);
             NetworkEnvelope responseNetworkEnvelope = new NetworkEnvelope(NetworkEnvelope.VERSION, token, new Response(capability, myLoad));
             bisq.network.protobuf.NetworkEnvelope responseProto = responseNetworkEnvelope.toProto();
             responseProto.writeDelimitedTo(outputStream);

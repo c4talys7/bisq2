@@ -34,7 +34,7 @@ public abstract class BaseNodesByIdTest extends BaseNetworkTest {
 
     void test_messageRoundTrip(Node.Config config) throws InterruptedException {
         BanList banList = new BanList();
-        NodesById nodesById = new NodesById(banList, config);
+        NodesById nodesById = new NodesById(banList, config, null);
         long ts = System.currentTimeMillis();
         numNodes = 5;
         int numRepeats = 1;
@@ -120,7 +120,7 @@ public abstract class BaseNodesByIdTest extends BaseNetworkTest {
 
     void test_initializeServer(Node.Config nodeConfig) throws InterruptedException {
         BanList banList = new BanList();
-        NodesById nodesById = new NodesById(banList, nodeConfig);
+        NodesById nodesById = new NodesById(banList, nodeConfig, null);
         initializeServers(2, nodesById);
         nodesById.shutdown().join();
     }

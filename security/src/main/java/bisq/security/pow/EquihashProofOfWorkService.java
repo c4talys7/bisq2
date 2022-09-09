@@ -71,6 +71,7 @@ public class EquihashProofOfWorkService extends ProofOfWorkService {
         String escapedOwnerId = ownerId.replace(" ", "  ");
         String concatenated = escapedItemId + ", " + escapedOwnerId;
         return DigestUtil.sha256(concatenated.getBytes(Charsets.UTF_8));
+
     }
 
     @Override

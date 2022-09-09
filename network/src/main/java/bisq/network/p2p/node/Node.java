@@ -18,6 +18,7 @@
 package bisq.network.p2p.node;
 
 
+import bisq.common.data.ByteArray;
 import bisq.common.observable.Observable;
 import bisq.common.util.CompletableFutureUtils;
 import bisq.common.util.NetworkUtils;
@@ -26,6 +27,7 @@ import bisq.network.NetworkService;
 import bisq.network.p2p.message.NetworkMessage;
 import bisq.network.p2p.node.authorization.AuthorizationService;
 import bisq.network.p2p.node.authorization.AuthorizationToken;
+import bisq.network.p2p.node.authorization.AuthorizationTokenType;
 import bisq.network.p2p.node.transport.ClearNetTransport;
 import bisq.network.p2p.node.transport.I2PTransport;
 import bisq.network.p2p.node.transport.TorTransport;
@@ -140,14 +142,19 @@ public class Node implements Connection.Handler {
     public AtomicReference<State> state = new AtomicReference<>(State.NEW);
     @Getter
     public Observable<State> observableState = new Observable<>(State.NEW);
+    @Getter
+    private ByteArray payload;
 
-    public Node(BanList banList, Config config, String nodeId) {
+    public Node(BanList banList, Config config, String nodeId, ByteArray payload) {
         this.banList = banList;
         transportType = config.getTransportType();
         transport = getTransport(transportType, config.getTransportConfig());
         authorizationService = config.getAuthorizationService();
         this.config = config;
         this.nodeId = nodeId;
+        this.payload = payload;
+
+        log.info("======================= {} =======================", payload);
 
         retryPolicy = RetryPolicy.<Boolean>builder()
                 .handle(IllegalStateException.class)
@@ -203,7 +210,8 @@ public class Node implements Connection.Handler {
 
     private void createServerAndListen(int port) {
         Transport.ServerSocketResult serverSocketResult = transport.getServerSocket(port, nodeId);
-        myCapability = Optional.of(new Capability(serverSocketResult.getAddress(), config.getSupportedTransportTypes()));
+        //TODO - Do not use hardcoded Equihash bellow....
+        myCapability = Optional.of(new Capability(serverSocketResult.getAddress(), config.getSupportedTransportTypes(), payload, AuthorizationTokenType.EQUIHASH_POW));
         server = Optional.of(new Server(serverSocketResult, 
                 socket -> onClientSocket(socket, serverSocketResult, myCapability.get()), 
                 exception -> {
@@ -264,7 +272,8 @@ public class Node implements Connection.Handler {
             throw new ConnectionClosedException(connection);
         }
         try {
-            AuthorizationToken token = authorizationService.createToken(networkMessage.getClass());
+            ByteArray payload = connection.getPeersCapability().getPayload();
+            AuthorizationToken token = authorizationService.createToken(payload, networkMessage.getClass());
             return connection.send(networkMessage, token);
         } catch (Throwable throwable) {
             if (connection.isRunning()) {

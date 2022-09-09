@@ -43,7 +43,7 @@ public abstract class BasePeerExchangeServiceTest extends BaseNetworkTest {
         int numSeeds = 2;
         int numNodes = 2;
         BanList banList = new BanList();
-        Node tempNode = new Node(banList, nodeConfig, "node-id");
+        Node tempNode = new Node(banList, nodeConfig, "node-id", null);
         PeerGroupStore peerGroupStore = new PeerGroupStore();
         PersistenceService persistenceService = new PersistenceService(getBaseDirName());
         KeepAliveService keepAliveService = new KeepAliveService(tempNode, null, null);
@@ -64,7 +64,7 @@ public abstract class BasePeerExchangeServiceTest extends BaseNetworkTest {
         List<Node> seeds = new ArrayList<>();
         for (int i = 0; i < numSeeds; i++) {
             int port = 10000 + i;
-            Node seed = new Node(banList, nodeConfig, "seed_" + i);
+            Node seed = new Node(banList, nodeConfig, "seed_" + i, null);
             seeds.add(seed);
             seed.initialize(port);
             initSeedsLatch.countDown();
@@ -82,7 +82,7 @@ public abstract class BasePeerExchangeServiceTest extends BaseNetworkTest {
         List<Node> nodes = new ArrayList<>();
         for (int i = 0; i < numNodes; i++) {
             int port = 3000 + i;
-            Node node = new Node(banList, nodeConfig, "node_" + i);
+            Node node = new Node(banList, nodeConfig, "node_" + i, null);
             nodes.add(node);
             node.initialize(port);
             initNodesLatch.countDown();

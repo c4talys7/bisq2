@@ -18,6 +18,7 @@
 package bisq.network.p2p;
 
 
+import bisq.common.data.ByteArray;
 import bisq.common.observable.Observable;
 import bisq.common.util.CompletableFutureUtils;
 import bisq.network.NetworkService;
@@ -112,7 +113,7 @@ public class ServiceNode {
                        List<Address> seedNodeAddresses,
                        Transport.Type transportType) {
         BanList banList = new BanList();
-        nodesById = new NodesById(banList, nodeConfig);
+        nodesById = new NodesById(banList, nodeConfig, new ByteArray(keyPairService.getDefaultPubKey().getHash()));
         defaultNode = nodesById.getOrCreateDefaultNode();
         Set<Service> services = config.getServices();
 

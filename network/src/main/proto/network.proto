@@ -29,6 +29,8 @@ message NetworkId {
 message Capability {
   Address address = 1;
   repeated string supportedTransportTypes = 2;
+  AuthorizationTokenType authTokenType = 3;
+  common.ByteArray pubKey = 4;
 }
 
 message Load {
@@ -250,7 +252,16 @@ message DataRequest {
 // NetworkEnvelope
 ////////////////////////////////////////////////////////////////////
 
-message AuthorizationToken {}
+enum AuthorizationTokenType {
+  UNRESTRICTED = 0;
+  EQUIHASH_POW = 1;
+  ACCOUNT_AGE = 2;
+}
+
+message AuthorizationToken {
+  AuthorizationTokenType authTokenType = 1;
+  optional security.ProofOfWork pow = 2;
+}
 
 message NetworkEnvelope {
   uint32 version = 1;

@@ -17,8 +17,10 @@
 
 package bisq.network.p2p.node;
 
+import bisq.common.data.ByteArray;
 import bisq.common.proto.Proto;
 import bisq.common.util.ProtobufUtils;
+import bisq.network.p2p.node.authorization.AuthorizationTokenType;
 import bisq.network.p2p.node.transport.Transport;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -33,10 +35,15 @@ import java.util.stream.Collectors;
 public final class Capability implements Proto {
     private final Address address;
     private final Set<Transport.Type> supportedTransportTypes;
+    private final ByteArray payload;
+    private final AuthorizationTokenType authTokenType;
 
-    public Capability(Address address, Set<Transport.Type> supportedTransportTypes) {
+    public Capability(Address address, Set<Transport.Type> supportedTransportTypes, ByteArray payload,
+                      AuthorizationTokenType authTokenType) {
         this.address = address;
         this.supportedTransportTypes = supportedTransportTypes;
+        this.payload = payload;
+        this.authTokenType = authTokenType;
     }
 
     public bisq.network.protobuf.Capability toProto() {
@@ -46,6 +53,8 @@ public final class Capability implements Proto {
                         .sorted(Enum::compareTo)
                         .map(Enum::name)
                         .collect(Collectors.toList()))
+                .setPubKey(payload.toProto())
+                .setAuthTokenType(authTokenType.toProto())
                 .build();
     }
 
@@ -53,6 +62,7 @@ public final class Capability implements Proto {
         Set<Transport.Type> supportedTransportTypes = proto.getSupportedTransportTypesList().stream()
                 .map(e -> ProtobufUtils.enumFromProto(Transport.Type.class, e))
                 .collect(Collectors.toSet());
-        return new Capability(Address.fromProto(proto.getAddress()), supportedTransportTypes);
+        return new Capability(Address.fromProto(proto.getAddress()), supportedTransportTypes,
+                ByteArray.fromProto(proto.getPubKey()), AuthorizationTokenType.fromProto(proto.getAuthTokenType()));
     }
 }

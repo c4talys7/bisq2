@@ -18,6 +18,7 @@
 package bisq.network.p2p;
 
 
+import bisq.common.data.ByteArray;
 import bisq.common.data.Pair;
 import bisq.common.observable.Observable;
 import bisq.common.util.CompletableFutureUtils;
@@ -27,6 +28,7 @@ import bisq.network.p2p.message.NetworkMessage;
 import bisq.network.p2p.node.Address;
 import bisq.network.p2p.node.Connection;
 import bisq.network.p2p.node.Node;
+import bisq.network.p2p.node.authorization.EquihashAuthorizationService;
 import bisq.network.p2p.node.authorization.UnrestrictedAuthorizationService;
 import bisq.network.p2p.node.transport.Transport;
 import bisq.network.p2p.services.confidential.ConfidentialMessageService;
@@ -69,7 +71,8 @@ public class ServiceNodesByTransport {
             Transport.Config transportConfig = configByTransportType.get(transportType);
             Node.Config nodeConfig = new Node.Config(transportType,
                     supportedTransportTypes,
-                    new UnrestrictedAuthorizationService(),
+                    //new UnrestrictedAuthorizationService(),
+                    new EquihashAuthorizationService(new ByteArray(keyPairService.getDefaultPubKey().getHash()), persistenceService),
                     transportConfig,
                     transportConfig.getSocketTimeout());
             List<Address> seedAddresses = seedAddressesByTransport.get(transportType);

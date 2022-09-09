@@ -17,8 +17,10 @@
 
 package bisq.network.p2p.node.authorization;
 
+import bisq.common.data.ByteArray;
 import bisq.network.p2p.message.NetworkMessage;
 
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -37,13 +39,13 @@ public class UnrestrictedAuthorizationService implements AuthorizationService {
     }
     
     @Override
-    public CompletableFuture<AuthorizationToken> createTokenAsync(Class<? extends NetworkMessage> messageClass) {
-        return CompletableFuture.completedFuture(new AuthorizationToken());
+    public CompletableFuture<AuthorizationToken> createTokenAsync(ByteArray payload, Class<? extends NetworkMessage> messageClass) {
+        return CompletableFuture.completedFuture(new AuthorizationToken(AuthorizationTokenType.UNRESTRICTED, Optional.empty()));
     }
 
     @Override
-    public AuthorizationToken createToken(Class<? extends NetworkMessage> message) {
-        return new AuthorizationToken();
+    public AuthorizationToken createToken(ByteArray payload, Class<? extends NetworkMessage> message) {
+        return new AuthorizationToken(AuthorizationTokenType.UNRESTRICTED, Optional.empty());
     }
 
     @Override
